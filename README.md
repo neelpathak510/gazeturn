@@ -126,6 +126,10 @@ Run the tests with `node tests/run-tests.js`. The simulation reads 10 pages at i
 - Pausing to think at the end of a line near the bottom for more than about 0.65 s can turn the page early in Last word mode. Raise *Rest on the last word for* in Tuning if that happens.
 - The distance estimate from the camera is rough (±20%). It only affects how errors are converted to degrees, not the page turning.
 
+## Licence
+
+MIT (see `LICENSE`). Third-party files in `vendor/` keep their own licences (see `vendor/README.md`).
+
 ## Credits
 
 - Face landmarks: Google MediaPipe Face Landmarker (Apache-2.0).
