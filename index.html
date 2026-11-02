@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en" data-look="keynote">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>GazeTurn</title>
+<meta name="description" content="Turn e-book pages with your eyes, using only a laptop webcam.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-view="intro">
+<div class="ambient" aria-hidden="true"></div>
+
+<header class="topbar">
+  <button class="wordmark" data-view="intro" aria-label="GazeTurn home"><span class="wm-light" aria-hidden="true"></span>GazeTurn</button>
+  <nav class="steps" aria-label="Steps">
+    <button class="step" data-view="setup">Setup</button>
+    <button class="step" data-view="calibrate">Calibrate</button>
+    <button class="step" data-view="check">Check</button>
+    <button class="step" data-view="read">Read</button>
+    <button class="step" data-view="results">Results</button>
+  </nav>
+  <div class="status">
+    <span class="st-face" id="st-face" data-state="off" title="Face tracking"></span>
+    <span class="st-calib" id="st-calib" data-state="off" title="Calibration accuracy">–</span>
+    <button class="icon-btn" id="btn-settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <!-- INTRO -->
+  <section class="view" id="view-intro">
+    <div class="hero">
+      <div class="orb-field" id="orb-field" aria-hidden="true"><div class="orb" id="intro-orb"></div></div>
+      <h1 class="display">GazeTurn</h1>
+      <p class="lede">Turn the page with a glance.</p>
+      <button class="btn big" id="btn-begin">Begin</button>
+    </div>
+  </section>
+
+  <!-- SETUP -->
+  <section class="view" id="view-setup" hidden>
+    <h1>Find your eyes.</h1>
+    <div class="cam-wrap" id="cam-wrap">
+      <canvas id="cam-canvas" width="1280" height="720" aria-label="Mirrored camera preview"></canvas>
+      <div class="cam-empty" id="cam-empty">
+        <button class="btn" id="btn-camera">Turn on camera</button>
+        <p class="hint" id="cam-msg"></p>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip" id="chk-face" data-state="off"><span class="k">Face</span><span class="v">–</span></span>
+      <span class="chip" id="chk-light" data-state="off"><span class="k">Light</span><span class="v">–</span></span>
+      <span class="chip" id="chk-dist" data-state="off"><span class="k">Distance</span><span class="v">–</span></span>
+      <span class="chip" id="chk-pos" data-state="off"><span class="k">Position</span><span class="v">–</span></span>
+      <span class="chip" id="chk-fps" data-state="off"><span class="k">Speed</span><span class="v">–</span></span>
+    </div>
+    <div class="row-center">
+      <label class="pill-select"><span>Display</span><select id="set-screen"></select></label>
+      <span class="pill-select" id="screen-custom-wrap"><input id="set-screen-cm" type="number" min="15" max="120" step="0.1" aria-label="Screen width in cm"><span>cm</span></span>
+      <output class="hint mono" id="out-screen"></output>
+    </div>
+    <div class="actions">
+      <button class="btn big" id="btn-setup-next" disabled>Continue</button>
+    </div>
+  </section>
+
+  <!-- CALIBRATE -->
+  <section class="view" id="view-calibrate" hidden>
+    <h1>Calibrate.</h1>
+    <p class="lede">Follow the light. Forty seconds.</p>
+    <div class="actions">
+      <button class="btn big" id="btn-calibrate">Start</button>
+    </div>
+    <p class="hint" id="cal-need"></p>
+    <div class="cal-result" id="cal-result" hidden>
+      <div class="big-stat">
+        <span class="big-num" id="cal-big">–</span>
+        <span class="big-label">accuracy</span>
+      </div>
+      <p class="sub-stats" id="cal-sub"></p>
+      <div class="engines" id="cal-engines" role="group" aria-label="Trackers compared on the same check dots"></div>
+      <canvas id="cal-plot" width="1200" height="760" aria-label="Check dots and where your gaze landed"></canvas>
+      <p class="hint" id="cal-note"></p>
+      <div class="actions">
+        <button class="btn" data-go="check">Continue</button>
+        <button class="btn ghost" id="btn-recal">Redo</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHECK -->
+  <section class="view" id="view-check" hidden>
+    <h1>Your gaze, live.</h1>
+    <p class="lede">Point where you look. See how far off it is.</p>
+    <div class="actions">
+      <button class="btn big" id="btn-cursor">Cursor test</button>
+      <button class="btn ghost big" id="btn-check">Rings</button>
+    </div>
+    <p class="hint"><button class="linkish" id="btn-capture">Record test data</button> &nbsp;·&nbsp; 3 minutes, saves a file for offline testing</p>
+    <p class="hint">Rest the cursor, look at its tip &nbsp;·&nbsp; hold <kbd>Space</kbd> to record while moving &nbsp;·&nbsp; <kbd>L</kbd> learn &nbsp;·&nbsp; <kbd>Esc</kbd> exit</p>
+    <p class="hint" id="check-need"></p>
+  </section>
+
+  <!-- READ -->
+  <section class="view" id="view-read" hidden>
+    <h1>Read.</h1>
+    <div class="form">
+      <div class="field">
+        <span class="flabel">Mode</span>
+        <div class="fctl">
+          <div class="seg" role="radiogroup" aria-label="Mode">
+            <label><input type="radio" name="mode" value="shadow"><span>Shadow</span></label>
+            <label><input type="radio" name="mode" value="live"><span>Live</span></label>
+          </div>
+          <p class="caption" id="mode-caption"></p>
+        </div>
+      </div>
+      <div class="field">
+        <span class="flabel">Detect</span>
+        <div class="fctl">
+          <div class="seg" role="radiogroup" aria-label="Detect the end of a page by">
+            <label><input type="radio" name="method" value="hybrid"><span>Both</span></label>
+            <label><input type="radio" name="method" value="endzone"><span>Last word</span></label>
+            <label><input type="radio" name="method" value="lookup"><span>Look up</span></label>
+          </div>
+          <p class="caption" id="method-caption"></p>
+        </div>
+      </div>
+      <div class="field" id="live-opts">
+        <span class="flabel">Turn by</span>
+        <div class="fctl">
+          <div class="seg" role="radiogroup" aria-label="Turn by">
+            <label><input type="radio" name="trigger" value="auto"><span>Auto</span></label>
+            <label><input type="radio" name="trigger" value="confirm"><span>Auto + gesture</span></label>
+            <label><input type="radio" name="trigger" value="dwell"><span>Look at Next</span></label>
+            <label><input type="radio" name="trigger" value="gesture"><span>Gesture</span></label>
+          </div>
+          <p class="caption" id="trigger-caption"></p>
+          <div class="row" id="gesture-map">
+            <label class="pill-select"><span>Next</span><select id="set-g-next"></select></label>
+            <label class="pill-select"><span>Back</span><select id="set-g-back"></select></label>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <span class="flabel">Book</span>
+        <div class="fctl">
+          <div class="seg" role="radiogroup" aria-label="Book">
+            <label><input type="radio" name="book" value="sample"><span>Story</span></label>
+            <label><input type="radio" name="book" value="file"><span>File</span></label>
+            <label><input type="radio" name="book" value="paste"><span>Paste</span></label>
+          </div>
+          <div class="row" id="book-file-wrap"><input type="file" id="book-file" accept=".txt,text/plain"><span class="caption" id="book-file-name"></span></div>
+          <textarea id="book-paste" rows="4" placeholder="Paste a chapter. Blank line between paragraphs."></textarea>
+        </div>
+      </div>
+      <div class="field">
+        <label class="flabel" for="set-font">Size</label>
+        <div class="fctl row"><input type="range" id="set-font" min="16" max="34" step="1"><output class="mono hint" id="out-font"></output></div>
+      </div>
+      <div class="field">
+        <span class="flabel">Options</span>
+        <div class="fctl toggles">
+          <label class="switch"><input type="checkbox" id="set-recentre"><span>Auto re-centre</span></label>
+          <label class="switch" id="layout-wrap"><input type="checkbox" id="set-layout"><span>Line-aware</span></label>
+          <label class="switch"><input type="checkbox" id="set-hud"><span>Status line</span></label>
+          <label class="switch"><input type="checkbox" id="set-gaze"><span>Show gaze</span></label>
+          <label class="switch"><input type="checkbox" id="set-flash"><span>Prediction flash</span></label>
+          <label class="switch"><input type="checkbox" id="set-paper"><span>Light page</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn big" id="btn-read">Start reading</button>
+    </div>
+    <p class="hint" id="read-need"></p>
+    <p class="hint"><kbd>→</kbd> next &nbsp;·&nbsp; <kbd>←</kbd> back &nbsp;·&nbsp; <kbd>C</kbd> re-centre &nbsp;·&nbsp; <kbd>P</kbd> pause &nbsp;·&nbsp; <kbd>Esc</kbd> end</p>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="view" id="view-results" hidden>
+    <div id="res-detail"></div>
+    <div class="history">
+      <div class="history-head">
+        <h2>History</h2>
+        <div class="actions tight">
+          <button class="btn ghost small" id="btn-import">Import</button>
+          <input type="file" id="file-import" accept=".json,application/json" hidden>
+          <button class="btn ghost small" id="btn-csv">Export CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="results" id="res-table">
+          <thead>
+            <tr><th>When</th><th>Test</th><th class="num">Min</th><th class="num">Pages</th><th class="num">Caught</th><th class="num">False/h</th><th class="num">Missed</th><th class="num">Lines</th><th class="num">Calib.</th><th></th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint" id="res-empty">Nothing yet. Finish a reading test.</p>
+    </div>
+  </section>
+
+  <!-- TUNING -->
+  <section class="view" id="view-tuning" hidden>
+    <h1>Tuning.</h1>
+    <p class="lede">Change one thing. Re-score a shadow test.</p>
+    <div id="tune-groups"></div>
+    <div class="actions">
+      <button class="btn ghost" id="btn-tune-reset">Reset</button>
+    </div>
+  </section>
+</main>
+
+<!-- SETTINGS DRAWER -->
+<aside class="drawer" id="drawer" hidden aria-label="Settings">
+  <div class="drawer-scrim" data-close></div>
+  <div class="drawer-panel">
+    <div class="drawer-head">
+      <h2>Settings</h2>
+      <button class="icon-btn" data-close aria-label="Close settings">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <section class="dsec">
+      <h3>Look</h3>
+      <div class="looks">
+        <button class="look" data-look="keynote"><i class="sw sw-keynote"></i>Keynote</button>
+        <button class="look" data-look="glass"><i class="sw sw-glass"></i>Glass</button>
+        <button class="look" data-look="halo"><i class="sw sw-halo"></i>Halo</button>
+      </div>
+    </section>
+    <section class="dsec">
+      <h3>Tracker</h3>
+      <div class="seg" role="radiogroup" aria-label="Tracker">
+        <label><input type="radio" name="engine" value="auto"><span>Best</span></label>
+        <label><input type="radio" name="engine" value="neural"><span>Neural</span></label>
+        <label><input type="radio" name="engine" value="fusion"><span>Fusion</span></label>
+        <label><input type="radio" name="engine" value="classic"><span>Classic</span></label>
+      </div>
+      <p class="hint left" id="nn-status"></p>
+    </section>
+    <section class="dsec">
+      <h3>Viewing distance</h3>
+      <label class="radio"><input type="radio" name="dist" value="auto" id="dist-auto"> Camera estimate <output class="mono hint" id="out-dist-est">–</output></label>
+      <label class="radio"><input type="radio" name="dist" value="manual" id="dist-manual"> Measured <input id="set-dist-cm" type="number" min="20" max="150" step="1" aria-label="Measured distance in cm"> cm</label>
+    </section>
+    <section class="dsec">
+      <h3>Face gestures</h3>
+      <div class="gestures" id="gestures"></div>
+      <p class="hint" id="gesture-msg" aria-live="polite"></p>
+    </section>
+    <section class="dsec">
+      <button class="btn ghost" data-go="tuning" data-close>Detector tuning</button>
+    </section>
+  </div>
+</aside>
+
+<video id="cam" playsinline muted></video>
+<div id="stage" hidden></div>
+
+<div id="reader" hidden>
+  <div class="r-top">
+    <span class="r-title" id="r-title"></span>
+    <span class="r-mode" id="r-mode"></span>
+    <span class="r-page" id="r-page"></span>
+    <button class="btn ghost small" id="r-end">End</button>
+  </div>
+  <div class="r-body" id="r-body">
+    <div class="r-zone" id="r-zone-back" hidden><span>‹</span><i></i></div>
+    <div class="r-clip" id="r-clip"><div class="r-flow" id="r-flow"></div><div class="r-endmark" id="r-endmark" hidden></div></div>
+    <div class="r-zone" id="r-zone-next" hidden><span>›</span><i></i></div>
+  </div>
+  <div class="r-hud" id="r-hud"></div>
+  <div class="r-flash" id="r-flash" hidden>would turn</div>
+  <div class="r-armed" id="r-armed" hidden></div>
+  <div class="r-banner" id="r-banner" hidden></div>
+  <div class="r-gaze" id="r-gaze" hidden></div>
+  <div class="r-pause" id="r-pause" hidden>
+    <div class="r-pause-card">
+      <h2>Paused.</h2>
+      <p class="hint" id="r-pause-msg"></p>
+      <div class="actions">
+        <button class="btn" id="r-resume">Resume</button>
+        <button class="btn ghost" id="r-finish">End and score</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" hidden></div>
+
+<script src="js/core/stats.js"></script>
+<script src="js/core/onefilter.js"></script>
+<script src="js/core/ridge.js"></script>
+<script src="js/core/features.js"></script>
+<script src="js/core/detector.js"></script>
+<script src="js/core/blazeprep.js"></script>
+<script src="js/neural.js"></script>
+<script src="js/zip.js"></script>
+<script src="js/capture.js"></script>
+<script src="js/sample-book.js"></script>
+<script src="js/app.js"></script>
+<script type="module">
+  // MediaPipe Face Landmarker (Google, Apache-2.0), loaded from the jsDelivr CDN.
+  try {
+    const m = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.0/vision_bundle.mjs");
+    window.GT.mp = { FaceLandmarker: m.FaceLandmarker, FilesetResolver: m.FilesetResolver };
+    window.dispatchEvent(new Event("gt-mp-ready"));
+  } catch (e) {
+    window.GT.mpError = String((e && e.message) || e);
+    window.dispatchEvent(new Event("gt-mp-error"));
+  }
+</script>
+</body>
+</html>

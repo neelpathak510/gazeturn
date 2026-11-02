@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+# recordings and exports can contain pictures of your face: keep them out of git
+*.nn.json
+gazeturn-capture-*.zip
+gazeturn-*.json

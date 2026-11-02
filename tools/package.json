@@ -1,0 +1,11 @@
+{
+  "name": "gazeturn-tools",
+  "private": true,
+  "description": "Offline test bench: replays a GazeTurn recording through every tracker and scores it.",
+  "scripts": { "bench": "node bench.js" },
+  "dependencies": {
+    "@tensorflow/tfjs": "4.22.0",
+    "@tensorflow/tfjs-backend-wasm": "4.22.0",
+    "jpeg-js": "0.4.4"
+  }
+}
